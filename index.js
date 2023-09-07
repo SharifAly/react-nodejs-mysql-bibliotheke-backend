@@ -56,5 +56,5 @@ app.delete("/book/delete/:id", (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`server is runnin on Port ${port}`);
+  console.log(`server is running on Port ${port}`);
 });
