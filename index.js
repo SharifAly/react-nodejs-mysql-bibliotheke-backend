@@ -2,9 +2,11 @@ import express from "express";
 import mysql from "mysql2";
 import cors from "cors";
 
+// Initialze the s
+
 const app = express();
 app.use(cors());
-app.use(express.json()); // Add this line to parse request body
+app.use(express.json());
 const port = 8000;
 
 // Create MySQL connection
@@ -14,15 +16,6 @@ const db = mysql.createPool({
   password: "",
   database: "react_bibliotheke",
 });
-
-// Connect to the database
-// connection.connect((error) => {
-//   if (error) {
-//     console.error("Error connecting to the database:", error);
-//   } else {
-//     console.log("Connected to the database");
-//   }
-// });
 
 // Routes and Middleware
 
@@ -45,10 +38,11 @@ app.get("/books", (req, res) => {
 
 app.post("/books", (req, res) => {
   // const upload = multer({ dest: "uploads/" });
-  const { Title, Description, Cover } = req.body; // Use req.body to access the data that was sent in the post request
+
+  const values = [req.body.Title, req.body.Description, req.body.Cover];
   db.query(
-    "INSERT INTO `books`(`Title`, `Description`, `Cover`) VALUES (?, ?, ?)", // Update the column names in the query
-    [Title, Description, Cover], // Use the correct variable names
+    "INSERT INTO `books`(`Title`, `Description`, `Cover`) VALUES (?, ?, ?)",
+    values,
     (error, results) => {
       if (error) {
         console.error("Error querying the database:", error);
