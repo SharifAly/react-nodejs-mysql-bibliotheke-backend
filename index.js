@@ -2,12 +2,15 @@ import express from "express";
 import mysql from "mysql2";
 import cors from "cors";
 import multer from "multer";
+import path from "path";
 
 // Initialze the server
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+// make the folder available for the client
+app.use(express.static("public"));
 
 const port = 8000;
 
@@ -25,12 +28,17 @@ const db = mysql.createPool({
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "../client/src/uploads");
+    cb(null, "./public/uploads");
   },
   filename: (req, file, cb) => {
-    cb(null, file.originalname);
+    cb(
+      null,
+      file.fieldname + "-" + Date.now() + "." + path.extname(file.originalname)
+    );
   },
 });
+
+// Set up upload for multer
 
 const upload = multer({ storage: storage });
 
@@ -51,7 +59,6 @@ app.get("/books", (req, res) => {
 
 // Route to create a new book
 app.post("/books", upload.single("file"), (req, res) => {
-  // const values = [req.body.Title, req.body.Description, req.file];
   const title = req.body.Title;
   const description = req.body.Description;
   const file = req.file;
