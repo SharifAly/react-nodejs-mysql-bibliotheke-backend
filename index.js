@@ -51,28 +51,56 @@ app.get("/books", (req, res) => {
       console.error("Error querying the database:", error);
       res.status(500).send("Error querying the database");
     } else {
-      console.log("Database results:", results);
+      // console.log("Database results:", results);
       res.json(results);
     }
   });
 });
 
 // Route to create a new book
+
 app.post("/books", upload.single("file"), (req, res) => {
   const title = req.body.Title;
   const description = req.body.Description;
   const file = req.file;
+
   let q = "INSERT INTO books(Title, Description, Cover) VALUES (?, ?, ?)";
+
   db.query(q, [title, description, file.filename], (error, results) => {
     if (error) {
-      console.error("Error querying the database:", error);
-      res.status(500).send("Error querying the database");
-    } else {
-      console.log("Database results:", results);
-      res.json(results);
+      console.error("Full error:", error);
+
+      if (error.code === "ER_DUP_ENTRY") {
+        return res.status(409).json({ error: "Duplicate entry" });
+      } else if (error.code === "ER_BAD_NULL_ERROR") {
+        return res.status(400).json({ error: "Validation error" });
+      } else {
+        return res.status(500).json({ error: "Database error" });
+      }
     }
-    console.log(results);
+
+    // console.log("Database results:", results);
+    res.json(results);
   });
+});
+
+// Route to delete a book
+
+app.delete("/books/:id", (req, res) => {
+  // Use bookId to delete the book from database
+  const bookId = req.params.id;
+  const q = "DELETE FROM `books` WHERE `Book_ID` = ?";
+  // ... database delete logic
+  db.query(q, bookId, (err, res) => {
+    if (err) {
+      console.error("Full error:", err);
+    }
+    // else {
+    //   console.log("Database results:", res);
+    // }
+  });
+
+  res.send("Book deleted successfully");
 });
 
 // Start the server
