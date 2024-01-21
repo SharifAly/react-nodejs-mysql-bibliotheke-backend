@@ -57,6 +57,22 @@ app.get("/books", (req, res) => {
   });
 });
 
+// Route to print a specific book
+
+app.get("/books/:id", (req, res) => {
+  let q = "SELECT * FROM books WHERE Book_ID =?";
+  let id = req.params.id;
+  db.query(q, id, (error, results) => {
+    if (error) {
+      console.error("Error querying the database:", error);
+      res.status(500).send("Error querying the database");
+    } else {
+      // console.log("Database results:", results);
+      res.json(results);
+    }
+  });
+});
+
 // Route to create a new book
 
 app.post("/books", upload.single("file"), (req, res) => {
@@ -101,6 +117,29 @@ app.delete("/books/:id", (req, res) => {
   });
 
   res.send("Book deleted successfully");
+});
+
+// Route to update a book
+
+app.put("/books/:id", upload.single("file"), (req, res) => {
+  const bookId = req.params.id;
+  const title = req.body.Title;
+  const description = req.body.Description;
+  const file = req.file;
+  let q =
+    "UPDATE `books` SET `Book_ID`=?,`Title`=?,`Description`=?,`Cover`=? WHERE Book_ID = ?";
+  db.query(
+    q,
+    [bookId, title, description, file.filename, bookId],
+    (err, res) => {
+      if (err) {
+        console.error("Full error:", err);
+      }
+      // else {
+      //   console.log("Database results:", res);
+      // }
+    }
+  );
 });
 
 // Start the server
